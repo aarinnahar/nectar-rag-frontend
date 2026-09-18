@@ -105,10 +105,53 @@ export default function NectarRagDashboard() {
   };
 
   const handleRunEvaluation = () => {
+    if (!docFile || !goldenDataFile) return;
+    
     setIsRunning(true);
-    setTimeout(() => setIsRunning(false), 3000);
-  };
 
+    try {
+      // 1. Pull the Vercel variable (or fallback to localhost if testing on your laptop)
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:10000';
+
+      // 2. Package the files and configurations for the backend
+      const formData = new FormData();
+      formData.append('document', docFile);
+      formData.append('golden_dataset', goldenDataFile);
+      formData.append('chunk_size', chunkSize);
+      formData.append('chunk_overlap', chunkOverlap);
+      formData.append('llm_provider', llmProvider);
+      formData.append('llm_model', llmModel);
+      formData.append('llm_key', llmKey);
+      formData.append('embed_provider', embedProvider);
+      formData.append('embed_model', embedModel);
+      formData.append('ollama_endpoint', ollamaEndpoint);
+
+      // 3. Send to your FastAPI backend
+      // NOTE: Ensure "/evaluate" matches the actual endpoint name in your api.py!
+      const response = await fetch(`${API_BASE_URL}/evaluate`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+      }
+
+      // 4. Handle the successful response (e.g., retrieving the HTML report)
+      const result = await response.json();
+      console.log("Evaluation Result:", result);
+      
+      alert("Evaluation completed successfully! Check console for results.");
+      
+      // TODO: You can update your React state here to display the final report/metrics to the user
+
+    } catch (error) {
+      console.error("Evaluation failed:", error);
+      alert(`Pipeline Error: ${error.message}`);
+    } finally {
+      setIsRunning(false);
+    }
+  };
   const steps = [
     { id: 1, title: 'Knowledge Ingestion', icon: Layers },
     { id: 2, title: 'Chunking Strategy', icon: Sparkles },

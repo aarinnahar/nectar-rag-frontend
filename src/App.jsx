@@ -104,7 +104,7 @@ export default function NectarRagDashboard() {
     setGoldenDataFile(file);
   };
 
-  const handleRunEvaluation = () => {
+  const handleRunEvaluation = async () => {
     if (!docFile || !goldenDataFile) return;
     
     setIsRunning(true);

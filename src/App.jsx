@@ -7,6 +7,11 @@ import {
 } from 'lucide-react';
 
 export default function NectarRagDashboard() {
+
+  const [isRunning, setIsRunning] = useState(false);
+  const [reportHtml, setReportHtml] = useState(null); 
+  const [liveNode, setLiveNode] = useState(''); // <-- NEW STATE
+  
   // --- UI State ---
   const [currentStep, setCurrentStep] = useState(1);
   const [showSamplesModal, setShowSamplesModal] = useState(false);
@@ -84,10 +89,11 @@ export default function NectarRagDashboard() {
     if (!docFile || !goldenDataFile) return;
     
     setIsRunning(true);
-    setReportHtml(null); // Clear old report before running
+    setReportHtml(null); 
+    setLiveNode('Initializing Server...'); // <-- Triggers the Modal
 
     try {
-      const API_BASE_URL = 'https://erasable-debtor-moisten.ngrok-free.dev'; // Ensure this matches your Ngrok tunnel
+      const API_BASE_URL = 'https://erasable-debtor-moisten.ngrok-free.dev'; 
 
       const formData = new FormData();
       formData.append('file', docFile);
@@ -108,19 +114,45 @@ export default function NectarRagDashboard() {
         throw new Error(`Server returned ${response.status}: ${response.statusText}`);
       }
 
-      const result = await response.json();
-      console.log("Evaluation Result:", result);
-      
-      // <-- Extract HTML from the backend response and save it to state
-      if (result.report_html) {
-        setReportHtml(result.report_html);
+      // --- Read the Live Stream ---
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
+      let done = false;
+
+      while (!done) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+        
+        if (value) {
+          buffer += decoder.decode(value, { stream: true });
+          const events = buffer.split('\n\n');
+          buffer = events.pop(); // Keep incomplete event string in buffer
+          
+          for (const event of events) {
+            if (event.startsWith('data: ')) {
+              const dataStr = event.slice(6);
+              const data = JSON.parse(dataStr);
+              
+              if (data.error) throw new Error(data.error);
+              
+              if (data.status === 'completed') {
+                setReportHtml(data.report_html);
+                setLiveNode(''); // Close Modal
+              } else if (data.node) {
+                // Formatting internal LangGraph names like "generate_report" to "Generate Report"
+                const formattedNodeName = data.node.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+                setLiveNode(formattedNodeName); 
+              }
+            }
+          }
+        }
       }
-      
-      alert("Evaluation completed successfully! You can now download your report.");
 
     } catch (error) {
       console.error("Evaluation failed:", error);
       alert(`Pipeline Error: ${error.message}`);
+      setLiveNode(''); // Close Modal on error
     } finally {
       setIsRunning(false);
     }
@@ -426,7 +458,28 @@ export default function NectarRagDashboard() {
 
         </div>
       </main>
-
+   
+      {/* --- Live Stream Loading Modal --- */}
+      {liveNode && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 transition-all">
+          <div className="bg-[#0A0E17] border border-white/10 rounded-2xl w-full max-w-sm shadow-2xl p-8 flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-300">
+            <div className="relative w-16 h-16 mb-6">
+              <div className="absolute inset-0 border-4 border-slate-800 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-amber-400 rounded-full border-t-transparent animate-spin"></div>
+              <Zap className="w-6 h-6 text-amber-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Executing Pipeline</h3>
+            <div className="flex items-center gap-2 text-sm font-mono text-amber-400 bg-amber-400/10 px-4 py-2 rounded-lg border border-amber-400/20">
+              <span className="w-2 h-2 bg-amber-400 rounded-full animate-ping"></span>
+              {liveNode}
+            </div>
+            <p className="text-xs text-slate-500 mt-4 leading-relaxed">
+              Evaluating RAG architecture and generating metrics...
+            </p>
+          </div>
+        </div>
+      )}
+      
       {/* --- Samples Dialog Modal --- */}
       {showSamplesModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">

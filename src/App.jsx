@@ -88,16 +88,14 @@ export default function NectarRagDashboard() {
 
       // 2. Package the files and configurations for the backend
       const formData = new FormData();
-      formData.append('document', docFile);
-      formData.append('golden_dataset', goldenDataFile);
+      formData.append('file', docFile);
+      formData.append('dataset', goldenDataFile);
       formData.append('chunk_size', chunkSize);
       formData.append('chunk_overlap', chunkOverlap);
-      formData.append('llm_provider', llmProvider);
-      formData.append('llm_model', llmModel);
-      formData.append('llm_key', llmKey);
-      formData.append('embed_provider', 'openai');
-      formData.append('embed_model', 'text-embedding-3-small');
-      formData.append('ollama_endpoint', ollamaEndpoint);
+      formData.append('provider', llmProvider);
+      formData.append('model_choice', llmModel);
+      formData.append('api_key', llmKey);
+      formData.append('api_url', ollamaEndpoint);
 
       // 3. Send to your FastAPI backend
       // NOTE: Ensure "/evaluate" matches the actual endpoint name in your api.py!

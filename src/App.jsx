@@ -84,7 +84,7 @@ export default function NectarRagDashboard() {
 
     try {
       // 1. Pull the Vercel variable (or fallback to localhost if testing on your laptop)
-      const API_BASE_URL = 'http://3.26.237.106:10000';
+      const API_BASE_URL = '/api';
 
       // 2. Package the files and configurations for the backend
       const formData = new FormData();

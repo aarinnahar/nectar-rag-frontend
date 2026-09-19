@@ -27,10 +27,6 @@ export default function NectarRagDashboard() {
   const [llmModel, setLlmModel] = useState('gpt-4o');
   const [ollamaEndpoint, setOllamaEndpoint] = useState('http://localhost:11434');
 
-  // --- Embedding Config State ---
-  const [embedProvider, setEmbedProvider] = useState('openai');
-  const [embedModel, setEmbedModel] = useState('text-embedding-3-small');
-
   // --- Execution State ---
   const [isRunning, setIsRunning] = useState(false);
 
@@ -44,7 +40,7 @@ export default function NectarRagDashboard() {
     groq: [
       { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B Versatile' },
       { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B Instant' },
-      { id: 'mixtral-8x7b-32768', name: 'Mixtral 8x7B 32k' }
+      { id: 'openai/gpt-oss-20b', name: 'Open AI-GPT OSS 20B' }
     ],
     ollama: [
       { id: 'llama3:latest', name: 'Llama 3 (Local)' },
@@ -53,33 +49,10 @@ export default function NectarRagDashboard() {
     ]
   };
 
-  const embedModelCatalog = {
-    openai: [
-      { id: 'text-embedding-3-small', name: 'Text-Embedding-3-Small' },
-      { id: 'text-embedding-3-large', name: 'Text-Embedding-3-Large' },
-      { id: 'text-embedding-ada-002', name: 'Ada-002 (Legacy)' }
-    ],
-    huggingface: [
-      { id: 'BAAI/bge-large-en-v1.5', name: 'BGE Large EN v1.5' },
-      { id: 'sentence-transformers/all-MiniLM-L6-v2', name: 'All-MiniLM-L6-v2' },
-      { id: 'intfloat/e5-large-v2', name: 'E5 Large v2' }
-    ],
-    ollama: [
-      { id: 'nomic-embed-text', name: 'Nomic Embed Text (Local)' },
-      { id: 'mxbai-embed-large', name: 'mxbai-embed-large (Local)' }
-    ]
-  };
-
   const handleLlmProviderChange = (e) => {
     const p = e.target.value;
     setLlmProvider(p);
     setLlmModel(llmModelCatalog[p][0].id);
-  };
-
-  const handleEmbedProviderChange = (e) => {
-    const p = e.target.value;
-    setEmbedProvider(p);
-    setEmbedModel(embedModelCatalog[p][0].id);
   };
 
   const handleDocUpload = (e) => {
@@ -122,8 +95,8 @@ export default function NectarRagDashboard() {
       formData.append('llm_provider', llmProvider);
       formData.append('llm_model', llmModel);
       formData.append('llm_key', llmKey);
-      formData.append('embed_provider', embedProvider);
-      formData.append('embed_model', embedModel);
+      formData.append('embed_provider', 'openai');
+      formData.append('embed_model', 'text-embedding-3-small');
       formData.append('ollama_endpoint', ollamaEndpoint);
 
       // 3. Send to your FastAPI backend
@@ -305,14 +278,14 @@ export default function NectarRagDashboard() {
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
                 <h2 className="text-lg font-semibold text-white">Model Selection</h2>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 gap-8">
                   {/* LLM */}
                   <div className="space-y-4">
                     <h3 className="text-sm font-medium text-amber-400 flex items-center gap-2 border-b border-white/5 pb-2"><Cpu className="w-4 h-4" /> LLM Inference</h3>
                     <div className="space-y-3">
                       <select value={llmProvider} onChange={handleLlmProviderChange} className="w-full bg-[#030712] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-amber-400 outline-none">
                         <option value="openai">OpenAI</option>
-                        <option value="groq">Groq Cloud (LPU)</option>
+                        <option value="groq">Groq</option>
                         <option value="ollama">Ollama (Local)</option>
                       </select>
                       
@@ -357,39 +330,9 @@ export default function NectarRagDashboard() {
                     </div>
                   </div>
 
-                  {/* Embeddings */}
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-medium text-amber-400 flex items-center gap-2 border-b border-white/5 pb-2"><Zap className="w-4 h-4" /> Embedding Vector Space</h3>
-                    <div className="space-y-3">
-                      <select value={embedProvider} onChange={handleEmbedProviderChange} className="w-full bg-[#030712] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-amber-400 outline-none">
-                        <option value="openai">OpenAI Embeddings</option>
-                        <option value="huggingface">Hugging Face</option>
-                        <option value="ollama">Ollama Embeddings</option>
-                      </select>
-                      
-                      <select value={embedModel} onChange={(e) => setEmbedModel(e.target.value)} className="w-full bg-[#030712] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-amber-400 outline-none">
-                        {embedModelCatalog[embedProvider].map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
-                      </select>
-
-                      {embedProvider === 'ollama' && (
-                        <div className="p-3.5 bg-blue-500/5 rounded-xl border border-blue-500/10 text-[11px] text-slate-300 space-y-2 mt-2">
-                          <p className="font-semibold text-blue-400 uppercase tracking-wider">Prerequisites for Ollama:</p>
-                          <ul className="list-disc pl-4 space-y-1.5 marker:text-blue-500/50">
-                            <li>
-                              Open your terminal and run:
-                              <div className="mt-1.5 flex items-center gap-2 bg-[#030712] border border-white/10 px-2.5 py-1.5 rounded-lg text-blue-300 font-mono">
-                                <Terminal className="w-3 h-3 text-slate-500" />
-                                ollama pull {embedModel}
-                              </div>
-                            </li>
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-3 bg-emerald-500/5 rounded-xl border border-emerald-500/10 flex gap-3 mt-4">
-                      <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <p className="text-[11px] text-slate-400 leading-tight">Keys use client-side ephemeral sessions and are never stored at rest.</p>
-                    </div>
+                  <div className="p-3 bg-emerald-500/5 rounded-xl border border-emerald-500/10 flex gap-3 mt-4">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <p className="text-[11px] text-slate-400 leading-tight">Keys use client-side ephemeral sessions and are never stored at rest.</p>
                   </div>
                 </div>
               </div>

@@ -8,9 +8,10 @@ import {
 
 export default function NectarRagDashboard() {
 
+  // --- Execution & Streaming State ---
   const [isRunning, setIsRunning] = useState(false);
   const [reportHtml, setReportHtml] = useState(null); 
-  const [liveNode, setLiveNode] = useState(''); // <-- NEW STATE
+  const [liveNode, setLiveNode] = useState('');
   
   // --- UI State ---
   const [currentStep, setCurrentStep] = useState(1);
@@ -31,10 +32,6 @@ export default function NectarRagDashboard() {
   const [llmKey, setLlmKey] = useState('');
   const [llmModel, setLlmModel] = useState('gpt-4o');
   const [ollamaEndpoint, setOllamaEndpoint] = useState('http://localhost:11434');
-
-  // --- Execution State ---
-  const [isRunning, setIsRunning] = useState(false);
-  const [reportHtml, setReportHtml] = useState(null); // <-- Added state to hold the HTML report
   
   // --- Provider Catalogs ---
   const llmModelCatalog = {

@@ -84,7 +84,7 @@ export default function NectarRagDashboard() {
 
     try {
       // 1. Pull the Vercel variable (or fallback to localhost if testing on your laptop)
-      const API_BASE_URL = '/api';
+      const API_BASE_URL = 'https://erasable-debtor-moisten.ngrok-free.dev';
 
       // 2. Package the files and configurations for the backend
       const formData = new FormData();

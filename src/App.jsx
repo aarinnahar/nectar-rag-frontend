@@ -3,7 +3,7 @@ import {
   UploadCloud, FileText, CheckCircle2, 
   Sparkles, Key, Cpu, Zap, Layers, Play, AlertCircle, 
   Trash2, ArrowRight, ArrowLeft, ShieldCheck, Terminal,
-  X, Eye, Database, BarChart
+  X, Eye, Database, BarChart, Download // <-- Added Download Icon
 } from 'lucide-react';
 
 export default function NectarRagDashboard() {
@@ -29,7 +29,8 @@ export default function NectarRagDashboard() {
 
   // --- Execution State ---
   const [isRunning, setIsRunning] = useState(false);
-
+  const [reportHtml, setReportHtml] = useState(null); // <-- Added state to hold the HTML report
+  
   // --- Provider Catalogs ---
   const llmModelCatalog = {
     openai: [
@@ -64,6 +65,7 @@ export default function NectarRagDashboard() {
     }
     setDocError('');
     setDocFile(file);
+    setReportHtml(null); // Reset report if a new file is uploaded
   };
 
   const handleJsonUpload = (e) => {
@@ -75,18 +77,18 @@ export default function NectarRagDashboard() {
     }
     setJsonError('');
     setGoldenDataFile(file);
+    setReportHtml(null); // Reset report if a new file is uploaded
   };
 
   const handleRunEvaluation = async () => {
     if (!docFile || !goldenDataFile) return;
     
     setIsRunning(true);
+    setReportHtml(null); // Clear old report before running
 
     try {
-      // 1. Pull the Vercel variable (or fallback to localhost if testing on your laptop)
-      const API_BASE_URL = 'https://erasable-debtor-moisten.ngrok-free.dev';
+      const API_BASE_URL = 'https://erasable-debtor-moisten.ngrok-free.dev'; // Ensure this matches your Ngrok tunnel
 
-      // 2. Package the files and configurations for the backend
       const formData = new FormData();
       formData.append('file', docFile);
       formData.append('dataset', goldenDataFile);
@@ -97,8 +99,6 @@ export default function NectarRagDashboard() {
       formData.append('api_key', llmKey);
       formData.append('api_url', ollamaEndpoint);
 
-      // 3. Send to your FastAPI backend
-      // NOTE: Ensure "/evaluate" matches the actual endpoint name in your api.py!
       const response = await fetch(`${API_BASE_URL}/evaluate`, {
         method: 'POST',
         body: formData,
@@ -108,13 +108,15 @@ export default function NectarRagDashboard() {
         throw new Error(`Server returned ${response.status}: ${response.statusText}`);
       }
 
-      // 4. Handle the successful response (e.g., retrieving the HTML report)
       const result = await response.json();
       console.log("Evaluation Result:", result);
       
-      alert("Evaluation completed successfully! Check console for results.");
+      // <-- Extract HTML from the backend response and save it to state
+      if (result.report_html) {
+        setReportHtml(result.report_html);
+      }
       
-      // TODO: You can update your React state here to display the final report/metrics to the user
+      alert("Evaluation completed successfully! You can now download your report.");
 
     } catch (error) {
       console.error("Evaluation failed:", error);
@@ -123,6 +125,25 @@ export default function NectarRagDashboard() {
       setIsRunning(false);
     }
   };
+
+  // <-- Handle forcing the browser to download the stored HTML string
+  const handleDownloadReport = () => {
+    if (!reportHtml) return;
+    
+    const blob = new Blob([reportHtml], { type: 'text/html' });
+    const downloadUrl = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = 'nectar_evaluation_report.html';
+    
+    document.body.appendChild(link);
+    link.click();
+    
+    document.body.removeChild(link);
+    URL.revokeObjectURL(downloadUrl);
+  };
+
   const steps = [
     { id: 1, title: 'Knowledge Ingestion', icon: Layers },
     { id: 2, title: 'Chunking Strategy', icon: Sparkles },
@@ -201,7 +222,7 @@ export default function NectarRagDashboard() {
                               <p className="text-xs text-slate-500">{(docFile.size / (1024 * 1024)).toFixed(2)} MB</p>
                             </div>
                           </div>
-                          <button onClick={(e) => { e.stopPropagation(); setDocFile(null); }} className="p-2 hover:bg-white/5 rounded-lg text-slate-400 hover:text-red-400 transition z-10 relative"><Trash2 className="w-4 h-4" /></button>
+                          <button onClick={(e) => { e.stopPropagation(); setDocFile(null); setReportHtml(null); }} className="p-2 hover:bg-white/5 rounded-lg text-slate-400 hover:text-red-400 transition z-10 relative"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       ) : (
                         <div className="space-y-2 pointer-events-none">
@@ -228,7 +249,7 @@ export default function NectarRagDashboard() {
                               <p className="text-xs text-slate-500">Schema Validated</p>
                             </div>
                           </div>
-                          <button onClick={(e) => { e.stopPropagation(); setGoldenDataFile(null); }} className="p-2 hover:bg-white/5 rounded-lg text-slate-400 hover:text-red-400 transition z-10 relative"><Trash2 className="w-4 h-4" /></button>
+                          <button onClick={(e) => { e.stopPropagation(); setGoldenDataFile(null); setReportHtml(null); }} className="p-2 hover:bg-white/5 rounded-lg text-slate-400 hover:text-red-400 transition z-10 relative"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       ) : (
                         <div className="space-y-2 pointer-events-none">
@@ -244,7 +265,7 @@ export default function NectarRagDashboard() {
               </div>
             )}
 
-            {/* STEP 2 & STEP 3 Remain exactly the same */}
+            {/* STEP 2 */}
             {currentStep === 2 && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
                 <div className="flex items-center justify-between">
@@ -272,12 +293,12 @@ export default function NectarRagDashboard() {
               </div>
             )}
 
+            {/* STEP 3 */}
             {currentStep === 3 && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
                 <h2 className="text-lg font-semibold text-white">Model Selection</h2>
                 
                 <div className="grid grid-cols-1 gap-8">
-                  {/* LLM */}
                   <div className="space-y-4">
                     <h3 className="text-sm font-medium text-amber-400 flex items-center gap-2 border-b border-white/5 pb-2"><Cpu className="w-4 h-4" /> LLM Inference</h3>
                     <div className="space-y-3">
@@ -367,21 +388,33 @@ export default function NectarRagDashboard() {
               </button>
             ) : (
               <div className="flex flex-col items-end gap-2 ml-auto">
-                <button 
-                  onClick={handleRunEvaluation}
-                  disabled={isRunning || !filesReady}
-                  className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2 shadow-lg ${
-                    isRunning || !filesReady
-                      ? 'bg-white/5 text-slate-500 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-emerald-500 to-emerald-400 hover:scale-[1.02] text-slate-950 shadow-emerald-500/20'
-                  }`}
-                >
-                  {isRunning ? (
-                    <><span className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" /> Provisioning...</>
-                  ) : (
-                    <><Play className="w-4 h-4 fill-slate-950" /> Initialize Run</>
+                <div className="flex items-center gap-3">
+                  {/* <-- Add the Download button conditionally next to Initialize Run --> */}
+                  {reportHtml && (
+                    <button 
+                      onClick={handleDownloadReport}
+                      className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white transition flex items-center gap-2 shadow-lg shadow-blue-500/20 animate-in fade-in zoom-in"
+                    >
+                      <Download className="w-4 h-4" /> Download Report
+                    </button>
                   )}
-                </button>
+                  
+                  <button 
+                    onClick={handleRunEvaluation}
+                    disabled={isRunning || !filesReady}
+                    className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2 shadow-lg ${
+                      isRunning || !filesReady
+                        ? 'bg-white/5 text-slate-500 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-emerald-500 to-emerald-400 hover:scale-[1.02] text-slate-950 shadow-emerald-500/20'
+                    }`}
+                  >
+                    {isRunning ? (
+                      <><span className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" /> Provisioning...</>
+                    ) : (
+                      <><Play className="w-4 h-4 fill-slate-950" /> Initialize Run</>
+                    )}
+                  </button>
+                </div>
                 {!filesReady && (
                   <span className="text-[10px] text-amber-500/70 font-medium uppercase tracking-wider">
                     Upload documents (Step 1) to enable
@@ -414,7 +447,6 @@ export default function NectarRagDashboard() {
             
             <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
               
-              {/* Card 1: PDF Source */}
               <div className="bg-[#030712] border border-white/5 rounded-xl p-6 flex flex-col items-center text-center gap-4 hover:border-amber-500/30 transition group">
                 <div className="w-14 h-14 rounded-full bg-amber-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <FileText className="w-7 h-7 text-amber-400" />
@@ -428,7 +460,6 @@ export default function NectarRagDashboard() {
                 </button>
               </div>
 
-              {/* Card 2: Golden Dataset */}
               <div className="bg-[#030712] border border-white/5 rounded-xl p-6 flex flex-col items-center text-center gap-4 hover:border-emerald-500/30 transition group">
                 <div className="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Database className="w-7 h-7 text-emerald-400" />
@@ -442,7 +473,6 @@ export default function NectarRagDashboard() {
                 </button>
               </div>
 
-              {/* Card 3: Evaluation Report */}
               <div className="bg-[#030712] border border-white/5 rounded-xl p-6 flex flex-col items-center text-center gap-4 hover:border-blue-500/30 transition group">
                 <div className="w-14 h-14 rounded-full bg-blue-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <BarChart className="w-7 h-7 text-blue-400" />

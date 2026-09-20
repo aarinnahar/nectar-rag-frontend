@@ -107,24 +107,15 @@ export default function NectarRagDashboard() {
         body: formData,
       });
 
+      // 1. PROPERLY READ THE AWS JSON ERROR
       if (!response.ok) {
-        // Try to safely parse the FastAPI error detail
-        let errorData = {};
+        let errorMessage = `Server returned ${response.status}`;
         try {
-          errorData = await response.json();
-        } catch (e) {
-          // If it's not JSON, ignore
-        }
-
-        // If FastAPI sent a specific detail message (like the 100-page limit)
-        if (errorData.detail) {
-          setDocError(errorData.detail); // Put the red text under the upload box
-          setLiveNode('');               // <--- CRITICAL: Close the modal!
-          return;                        // Abort the rest of the pipeline
-        }
+          const errorData = await response.json();
+          if (errorData.detail) errorMessage = errorData.detail;
+        } catch (e) {} // Fallback if response isn't JSON
         
-        // If it's a generic server crash (like 500)
-        throw new Error(`Server returned ${response.status}`);
+        throw new Error(errorMessage); // Sends it straight to the catch block
       }
 
       // --- Read the Live Stream ---
@@ -164,12 +155,22 @@ export default function NectarRagDashboard() {
 
     } catch (error) {
       console.error("Evaluation failed:", error);
+      
+      // 2. INSTANTLY CLOSE THE MODAL
+      setLiveNode(''); 
+      
+      // 3. SHOW THE AWS ERROR TO THE USER
       alert(`Pipeline Error: ${error.message}`);
-      setLiveNode(''); // Close Modal on error
+      
+      // 4. JUMP BACK TO STEP 1 FOR FILE ERRORS
+      if (error.message.includes("pages") || error.message.includes("format")) {
+        setCurrentStep(1);
+        setDocError(error.message);
+      }
+      
     } finally {
       setIsRunning(false);
     }
-  };
 
   // <-- Handle forcing the browser to download the stored HTML string
   const handleDownloadReport = () => {

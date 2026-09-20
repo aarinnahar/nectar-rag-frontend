@@ -108,7 +108,13 @@ export default function NectarRagDashboard() {
       });
 
       if (!response.ok) {
-        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        const errorData = await response.json();
+        // Look for the specific FastAPI detail message
+        if (errorData.detail) {
+           setDocError(errorData.detail); // Puts the backend error in the red UI text
+           return; // Stop execution
+        }
+        throw new Error(`Server returned ${response.status}`);
       }
 
       // --- Read the Live Stream ---

@@ -220,26 +220,30 @@ export default function NectarRagDashboard() {
         <div className="w-full flex flex-col">
           
           <div className="flex items-center justify-between mb-8 relative w-full px-4 md:px-12">
-            <div className="absolute left-10 right-10 top-1/2 -translate-y-1/2 h-px bg-white/5 z-0" />
-            {steps.map((step) => {
-              const isActive = step.id === currentStep;
-              const isPassed = step.id < currentStep;
-              const Icon = step.icon;
-              return (
-                <div key={step.id} className="relative z-10 flex flex-col items-center gap-2 bg-[#030712] px-4">
+          <div className="absolute left-10 right-10 top-1/2 -translate-y-1/2 h-px bg-white/5 z-0" />
+          {steps.map((step) => {
+            const isActive = step.id === currentStep;
+            const isPassed = step.id < currentStep;
+            const Icon = step.icon;
+            return (
+              <div key={step.id} className="relative z-10 flex flex-col items-center gap-2">
+                {/* Tightly contours the background mask to a circle */}
+                <div className="bg-[#030712] rounded-full p-1">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
                     isActive ? 'border-amber-400 bg-amber-400/10 text-amber-400' : 
                     isPassed ? 'border-emerald-500 bg-emerald-500/10 text-emerald-500' : 'border-white/10 bg-[#0A0E17] text-slate-500'
                   }`}>
                     {isPassed ? <CheckCircle2 className="w-5 h-5" /> : <Icon className="w-4 h-4" />}
                   </div>
-                  <span className={`text-xs font-semibold tracking-wide ${isActive ? 'text-white' : 'text-slate-500'}`}>
-                    {step.title}
-                  </span>
                 </div>
-              );
-            })}
-          </div>
+                {/* Tightly contours the background mask to the text */}
+                <span className={`text-xs font-semibold tracking-wide px-3 bg-[#030712] ${isActive ? 'text-white' : 'text-slate-500'}`}>
+                  {step.title}
+                </span>
+              </div>
+            );
+          })}
+        </div>
 
           <div className="w-full bg-[#0A0E17] border border-white/5 rounded-2xl shadow-2xl p-8 mb-6">
             
@@ -457,6 +461,17 @@ export default function NectarRagDashboard() {
 
         </div>
       </main>
+
+      {/* --- Creator Footer --- */}
+      <footer className="relative z-10 w-full py-6 mt-auto border-t border-white/5 flex flex-col items-center justify-center gap-2 bg-[#030712]">
+        <p className="text-sm font-medium text-slate-400 flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-amber-500" />
+          Built by <span className="text-amber-400">Aarin Nahar</span>
+        </p>
+        <a href="mailto:aarinnahar@gmail.com" className="text-xs text-slate-500 hover:text-amber-400 transition-colors">
+          For any queries, contact me at aarinnahar@gmail.com
+        </a>
+      </footer>
    
       {liveNode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 transition-all">

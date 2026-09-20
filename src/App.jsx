@@ -108,12 +108,22 @@ export default function NectarRagDashboard() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        // Look for the specific FastAPI detail message
-        if (errorData.detail) {
-           setDocError(errorData.detail); // Puts the backend error in the red UI text
-           return; // Stop execution
+        // Try to safely parse the FastAPI error detail
+        let errorData = {};
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          // If it's not JSON, ignore
         }
+
+        // If FastAPI sent a specific detail message (like the 100-page limit)
+        if (errorData.detail) {
+          setDocError(errorData.detail); // Put the red text under the upload box
+          setLiveNode('');               // <--- CRITICAL: Close the modal!
+          return;                        // Abort the rest of the pipeline
+        }
+        
+        // If it's a generic server crash (like 500)
         throw new Error(`Server returned ${response.status}`);
       }
 

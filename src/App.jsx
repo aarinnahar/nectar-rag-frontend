@@ -155,12 +155,17 @@ export default function NectarRagDashboard() {
     } catch (error) {
       console.error("Evaluation failed:", error);
       
+      // 1. INSTANTLY CLOSE THE MODAL
       setLiveNode(''); 
-      alert(`Pipeline Error: ${error.message}`);
       
+      // 2. ROUTE THE ERROR SILENTLY OR SHOW POPUP
       if (error.message.includes("pages") || error.message.includes("format")) {
+        // Expected validation error: Jump to Step 1 and show red text directly (No popup!)
         setCurrentStep(1);
         setDocError(error.message);
+      } else {
+        // Unexpected system crash: Show the popup alert
+        alert(`Pipeline Error: ${error.message}`);
       }
       
     } finally {

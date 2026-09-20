@@ -92,7 +92,7 @@ export default function NectarRagDashboard() {
     setLiveNode('Initializing Server...');
 
     try {
-      const API_BASE_URL = 'ngrok url here'; // <-- Make sure to put your exact Ngrok URL back here!
+      const API_BASE_URL = 'https://erasable-debtor-moisten.ngrok-free.dev'; // 
 
       const formData = new FormData();
       formData.append('file', docFile);

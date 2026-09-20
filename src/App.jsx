@@ -3,7 +3,7 @@ import {
   UploadCloud, FileText, CheckCircle2, 
   Sparkles, Key, Cpu, Zap, Layers, Play, AlertCircle, 
   Trash2, ArrowRight, ArrowLeft, ShieldCheck, Terminal,
-  X, Eye, Database, BarChart, Download // <-- Added Download Icon
+  X, Eye, Database, BarChart, Download
 } from 'lucide-react';
 
 export default function NectarRagDashboard() {
@@ -61,13 +61,15 @@ export default function NectarRagDashboard() {
   const handleDocUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 100 * 1024 * 1024) {
-      setDocError('File size exceeds 100MB.');
+    
+    // Updated to 10MB to protect the AWS 1GB RAM server
+    if (file.size > 10 * 1024 * 1024) { 
+      setDocError('File size exceeds the 10MB free-tier limit.');
       return;
     }
     setDocError('');
     setDocFile(file);
-    setReportHtml(null); // Reset report if a new file is uploaded
+    setReportHtml(null);
   };
 
   const handleJsonUpload = (e) => {
@@ -79,7 +81,7 @@ export default function NectarRagDashboard() {
     }
     setJsonError('');
     setGoldenDataFile(file);
-    setReportHtml(null); // Reset report if a new file is uploaded
+    setReportHtml(null);
   };
 
   const handleRunEvaluation = async () => {
@@ -87,10 +89,10 @@ export default function NectarRagDashboard() {
     
     setIsRunning(true);
     setReportHtml(null); 
-    setLiveNode('Initializing Server...'); // <-- Triggers the Modal
+    setLiveNode('Initializing Server...');
 
     try {
-      const API_BASE_URL = 'https://erasable-debtor-moisten.ngrok-free.dev'; 
+      const API_BASE_URL = 'ngrok url here'; // <-- Make sure to put your exact Ngrok URL back here!
 
       const formData = new FormData();
       formData.append('file', docFile);
@@ -107,18 +109,16 @@ export default function NectarRagDashboard() {
         body: formData,
       });
 
-      // 1. PROPERLY READ THE AWS JSON ERROR
       if (!response.ok) {
         let errorMessage = `Server returned ${response.status}`;
         try {
           const errorData = await response.json();
           if (errorData.detail) errorMessage = errorData.detail;
-        } catch (e) {} // Fallback if response isn't JSON
+        } catch (e) {} 
         
-        throw new Error(errorMessage); // Sends it straight to the catch block
+        throw new Error(errorMessage);
       }
 
-      // --- Read the Live Stream ---
       const reader = response.body.getReader();
       const decoder = new TextDecoder("utf-8");
       let buffer = "";
@@ -131,7 +131,7 @@ export default function NectarRagDashboard() {
         if (value) {
           buffer += decoder.decode(value, { stream: true });
           const events = buffer.split('\n\n');
-          buffer = events.pop(); // Keep incomplete event string in buffer
+          buffer = events.pop(); 
           
           for (const event of events) {
             if (event.startsWith('data: ')) {
@@ -142,9 +142,8 @@ export default function NectarRagDashboard() {
               
               if (data.status === 'completed') {
                 setReportHtml(data.report_html);
-                setLiveNode(''); // Close Modal
+                setLiveNode(''); 
               } else if (data.node) {
-                // Formatting internal LangGraph names like "generate_report" to "Generate Report"
                 const formattedNodeName = data.node.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
                 setLiveNode(formattedNodeName); 
               }
@@ -156,13 +155,9 @@ export default function NectarRagDashboard() {
     } catch (error) {
       console.error("Evaluation failed:", error);
       
-      // 2. INSTANTLY CLOSE THE MODAL
       setLiveNode(''); 
-      
-      // 3. SHOW THE AWS ERROR TO THE USER
       alert(`Pipeline Error: ${error.message}`);
       
-      // 4. JUMP BACK TO STEP 1 FOR FILE ERRORS
       if (error.message.includes("pages") || error.message.includes("format")) {
         setCurrentStep(1);
         setDocError(error.message);
@@ -171,8 +166,8 @@ export default function NectarRagDashboard() {
     } finally {
       setIsRunning(false);
     }
+  }; // <--- THIS BRACE WAS MISSING
 
-  // <-- Handle forcing the browser to download the stored HTML string
   const handleDownloadReport = () => {
     if (!reportHtml) return;
     
@@ -201,16 +196,13 @@ export default function NectarRagDashboard() {
   return (
     <div className="min-h-screen bg-[#030712] text-slate-200 font-sans antialiased selection:bg-amber-400 selection:text-black flex flex-col">
       
-      {/* Background Gradients */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[120px]" />
         <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[150px]" />
       </div>
 
-      {/* Main Container */}
       <main className="relative flex-1 flex flex-col items-center justify-center px-6 py-12 w-full max-w-4xl mx-auto z-10">
         
-        {/* Hero Section */}
         <div className="text-center mb-12 mt-8">
           <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter mb-4">
             Nectar <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-200">RAG</span>
@@ -220,10 +212,8 @@ export default function NectarRagDashboard() {
           </p>
         </div>
 
-        {/* Wizard Form Container */}
         <div className="w-full flex flex-col">
           
-          {/* Stepper Header */}
           <div className="flex items-center justify-between mb-8 relative w-full px-4 md:px-12">
             <div className="absolute left-10 right-10 top-1/2 -translate-y-1/2 h-px bg-white/5 z-0" />
             {steps.map((step) => {
@@ -246,15 +236,12 @@ export default function NectarRagDashboard() {
             })}
           </div>
 
-          {/* Dynamic Step Content */}
           <div className="w-full bg-[#0A0E17] border border-white/5 rounded-2xl shadow-2xl p-8 mb-6">
             
-            {/* STEP 1 */}
             {currentStep === 1 && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
                 <h2 className="text-lg font-semibold text-white mb-6">Upload Context & Truth</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Source Documents */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Source Documents</label>
                     <div className={`relative group border border-dashed rounded-xl p-6 text-center transition duration-200 flex flex-col justify-center min-h-[140px] ${docFile ? 'border-amber-500/50 bg-amber-500/[0.02]' : 'border-white/10 hover:border-white/20 bg-white/[0.01]'}`}>
@@ -281,7 +268,6 @@ export default function NectarRagDashboard() {
                     {docError && <p className="mt-2 text-xs text-red-400 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" />{docError}</p>}
                   </div>
 
-                  {/* Golden Dataset */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Golden Dataset (.json)</label>
                     <div className={`relative group border border-dashed rounded-xl p-6 text-center transition duration-200 flex flex-col justify-center min-h-[140px] ${goldenDataFile ? 'border-emerald-500/50 bg-emerald-500/[0.02]' : 'border-white/10 hover:border-white/20 bg-white/[0.01]'}`}>
@@ -311,7 +297,6 @@ export default function NectarRagDashboard() {
               </div>
             )}
 
-            {/* STEP 2 */}
             {currentStep === 2 && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
                 <div className="flex items-center justify-between">
@@ -339,7 +324,6 @@ export default function NectarRagDashboard() {
               </div>
             )}
 
-            {/* STEP 3 */}
             {currentStep === 3 && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
                 <h2 className="text-lg font-semibold text-white">Model Selection</h2>
@@ -404,10 +388,8 @@ export default function NectarRagDashboard() {
             )}
           </div>
 
-          {/* Navigation Controls */}
           <div className="flex items-center justify-between w-full">
             
-            {/* Left Side Action: Samples on Step 1, Back on others */}
             {currentStep === 1 ? (
               <button 
                 onClick={() => setShowSamplesModal(true)}
@@ -424,7 +406,6 @@ export default function NectarRagDashboard() {
               </button>
             )}
             
-            {/* Right Side Action */}
             {currentStep < 3 ? (
               <button 
                 onClick={() => setCurrentStep(prev => Math.min(3, prev + 1))}
@@ -435,7 +416,6 @@ export default function NectarRagDashboard() {
             ) : (
               <div className="flex flex-col items-end gap-2 ml-auto">
                 <div className="flex items-center gap-3">
-                  {/* <-- Add the Download button conditionally next to Initialize Run --> */}
                   {reportHtml && (
                     <button 
                       onClick={handleDownloadReport}
@@ -473,7 +453,6 @@ export default function NectarRagDashboard() {
         </div>
       </main>
    
-      {/* --- Live Stream Loading Modal --- */}
       {liveNode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 transition-all">
           <div className="bg-[#0A0E17] border border-white/10 rounded-2xl w-full max-w-sm shadow-2xl p-8 flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-300">
@@ -494,7 +473,6 @@ export default function NectarRagDashboard() {
         </div>
       )}
       
-      {/* --- Samples Dialog Modal --- */}
       {showSamplesModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-[#0A0E17] border border-white/10 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
@@ -560,4 +538,4 @@ export default function NectarRagDashboard() {
 
     </div>
   );
-}};
+} 

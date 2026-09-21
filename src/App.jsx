@@ -561,8 +561,8 @@ export default function NectarRagDashboard() {
           </div>
           {/* Replaced Button with Anchor tag for viewing/downloading */}
           <a 
-            href="/samples/nectar_evaluation_report.pdf" 
-            download="Evaluation_Report.pdf"
+            href="/samples/nectar_evaluation_report.html" 
+            download="nectar_evaluation_report.html"
             className="mt-auto px-4 py-2.5 bg-white/5 hover:bg-white/10 text-xs font-semibold rounded-lg text-white transition w-full block text-center"
           >
             View Report

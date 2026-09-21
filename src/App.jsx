@@ -523,8 +523,8 @@ export default function NectarRagDashboard() {
           </div>
           {/* Replaced Button with Anchor tag for Download */}
           <a 
-            href="/samples/knowledge-source.pdf" 
-            download="Knowledge_Source.pdf"
+            href="/samples/knowledge_source.pdf" 
+            download="knowledge_source.pdf"
             className="mt-auto px-4 py-2.5 bg-white/5 hover:bg-white/10 text-xs font-semibold rounded-lg text-white transition w-full block text-center"
           >
             Download PDF
@@ -542,8 +542,8 @@ export default function NectarRagDashboard() {
           </div>
           {/* Replaced Button with Anchor tag for Download */}
           <a 
-            href="/samples/golden-dataset.json" 
-            download="Golden_Dataset.json"
+            href="/samples/golden_dataset.json" 
+            download="golden_dataset.json"
             className="mt-auto px-4 py-2.5 bg-white/5 hover:bg-white/10 text-xs font-semibold rounded-lg text-white transition w-full block text-center"
           >
             Download JSON
@@ -561,7 +561,7 @@ export default function NectarRagDashboard() {
           </div>
           {/* Replaced Button with Anchor tag for viewing/downloading */}
           <a 
-            href="/samples/evaluation-report.pdf" 
+            href="/samples/nectar_evaluation_report.pdf" 
             download="Evaluation_Report.pdf"
             className="mt-auto px-4 py-2.5 bg-white/5 hover:bg-white/10 text-xs font-semibold rounded-lg text-white transition w-full block text-center"
           >

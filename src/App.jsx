@@ -494,67 +494,85 @@ export default function NectarRagDashboard() {
       )}
       
       {showSamplesModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-[#0A0E17] border border-white/10 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            
-            <div className="p-5 border-b border-white/5 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Eye className="w-5 h-5 text-amber-400" />
-                Example Datasets & Outputs
-              </h3>
-              <button 
-                onClick={() => setShowSamplesModal(false)} 
-                className="text-slate-500 hover:text-white bg-white/5 hover:bg-white/10 p-1.5 rounded-lg transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-              
-              <div className="bg-[#030712] border border-white/5 rounded-xl p-6 flex flex-col items-center text-center gap-4 hover:border-amber-500/30 transition group">
-                <div className="w-14 h-14 rounded-full bg-amber-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <FileText className="w-7 h-7 text-amber-400" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-white">Knowledge Source</h4>
-                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">A sample PDF document containing standard corporate guidelines and HR policies.</p>
-                </div>
-                <button className="mt-auto px-4 py-2.5 bg-white/5 hover:bg-white/10 text-xs font-semibold rounded-lg text-white transition w-full">
-                  Download PDF
-                </button>
-              </div>
-
-              <div className="bg-[#030712] border border-white/5 rounded-xl p-6 flex flex-col items-center text-center gap-4 hover:border-emerald-500/30 transition group">
-                <div className="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Database className="w-7 h-7 text-emerald-400" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-white">Golden Dataset</h4>
-                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">Pre-formatted ground truth Q&A pairs in JSON format to validate pipeline recall.</p>
-                </div>
-                <button className="mt-auto px-4 py-2.5 bg-white/5 hover:bg-white/10 text-xs font-semibold rounded-lg text-white transition w-full">
-                  Download JSON
-                </button>
-              </div>
-
-              <div className="bg-[#030712] border border-white/5 rounded-xl p-6 flex flex-col items-center text-center gap-4 hover:border-blue-500/30 transition group">
-                <div className="w-14 h-14 rounded-full bg-blue-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <BarChart className="w-7 h-7 text-blue-400" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-white">Evaluation Report</h4>
-                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">A sample output report showing generated RAG metrics, latency, and cost analysis.</p>
-                </div>
-                <button className="mt-auto px-4 py-2.5 bg-white/5 hover:bg-white/10 text-xs font-semibold rounded-lg text-white transition w-full">
-                  View Report
-                </button>
-              </div>
-
-            </div>
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="bg-[#0A0E17] border border-white/10 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      
+      <div className="p-5 border-b border-white/5 flex items-center justify-between">
+        <h3 className="text-lg font-bold text-white flex items-center gap-2">
+          <Eye className="w-5 h-5 text-amber-400" />
+          Example Datasets & Outputs
+        </h3>
+        <button 
+          onClick={() => setShowSamplesModal(false)} 
+          className="text-slate-500 hover:text-white bg-white/5 hover:bg-white/10 p-1.5 rounded-lg transition"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+      
+      <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        {/* Knowledge Source Card */}
+        <div className="bg-[#030712] border border-white/5 rounded-xl p-6 flex flex-col items-center text-center gap-4 hover:border-amber-500/30 transition group">
+          <div className="w-14 h-14 rounded-full bg-amber-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <FileText className="w-7 h-7 text-amber-400" />
           </div>
+          <div>
+            <h4 className="text-sm font-semibold text-white">Knowledge Source</h4>
+            <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">A sample PDF document containing standard corporate guidelines and HR policies.</p>
+          </div>
+          {/* Replaced Button with Anchor tag for Download */}
+          <a 
+            href="/samples/knowledge-source.pdf" 
+            download="Knowledge_Source.pdf"
+            className="mt-auto px-4 py-2.5 bg-white/5 hover:bg-white/10 text-xs font-semibold rounded-lg text-white transition w-full block text-center"
+          >
+            Download PDF
+          </a>
         </div>
-      )}
+
+        {/* Golden Dataset Card */}
+        <div className="bg-[#030712] border border-white/5 rounded-xl p-6 flex flex-col items-center text-center gap-4 hover:border-emerald-500/30 transition group">
+          <div className="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Database className="w-7 h-7 text-emerald-400" />
+          </div>
+          <div>
+            <h4 className="text-sm font-semibold text-white">Golden Dataset</h4>
+            <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">Pre-formatted ground truth Q&A pairs in JSON format to validate pipeline recall.</p>
+          </div>
+          {/* Replaced Button with Anchor tag for Download */}
+          <a 
+            href="/samples/golden-dataset.json" 
+            download="Golden_Dataset.json"
+            className="mt-auto px-4 py-2.5 bg-white/5 hover:bg-white/10 text-xs font-semibold rounded-lg text-white transition w-full block text-center"
+          >
+            Download JSON
+          </a>
+        </div>
+
+        {/* Evaluation Report Card */}
+        <div className="bg-[#030712] border border-white/5 rounded-xl p-6 flex flex-col items-center text-center gap-4 hover:border-blue-500/30 transition group">
+          <div className="w-14 h-14 rounded-full bg-blue-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <BarChart className="w-7 h-7 text-blue-400" />
+          </div>
+          <div>
+            <h4 className="text-sm font-semibold text-white">Evaluation Report</h4>
+            <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">A sample output report showing generated RAG metrics, latency, and cost analysis.</p>
+          </div>
+          {/* Replaced Button with Anchor tag for viewing/downloading */}
+          <a 
+            href="/samples/evaluation-report.pdf" 
+            download="Evaluation_Report.pdf"
+            className="mt-auto px-4 py-2.5 bg-white/5 hover:bg-white/10 text-xs font-semibold rounded-lg text-white transition w-full block text-center"
+          >
+            View Report
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+)}
 
     </div>
   );

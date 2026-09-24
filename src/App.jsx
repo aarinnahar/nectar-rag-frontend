@@ -16,6 +16,7 @@ export default function NectarRagDashboard() {
   // --- UI State ---
   const [currentStep, setCurrentStep] = useState(1);
   const [showSamplesModal, setShowSamplesModal] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
 
   // --- File Upload State ---
   const [docFile, setDocFile] = useState(null);
@@ -400,12 +401,22 @@ export default function NectarRagDashboard() {
           <div className="flex items-center justify-between w-full">
             
             {currentStep === 1 ? (
-              <button 
-                onClick={() => setShowSamplesModal(true)}
-                className="px-5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-2 text-amber-400/80 hover:text-amber-400 bg-amber-400/5 hover:bg-amber-400/10 border border-amber-400/10"
-              >
-                <Eye className="w-4 h-4" /> View Samples
-              </button>
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setShowSamplesModal(true)}
+                  className="px-5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-2 text-amber-400/80 hover:text-amber-400 bg-amber-400/5 hover:bg-amber-400/10 border border-amber-400/10"
+                >
+                  <Eye className="w-4 h-4" /> View Samples
+                </button>
+                
+                {/* --- NEW VIDEO DEMO BUTTON --- */}
+                <button 
+                  onClick={() => setShowVideoModal(true)}
+                  className="px-5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-2 text-blue-400/80 hover:text-blue-400 bg-blue-400/5 hover:bg-blue-400/10 border border-blue-400/10"
+                >
+                  <Play className="w-4 h-4" /> Video Demo
+                </button>
+              </div>
             ) : (
               <button 
                 onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
@@ -573,7 +584,41 @@ export default function NectarRagDashboard() {
           </div>
         </div>
       )}
-
+      {/* --- YouTube Video Modal --- */}
+      {showVideoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="bg-[#0A0E17] border border-white/10 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            
+            <div className="p-5 border-b border-white/5 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <Play className="w-5 h-5 text-blue-400" />
+                Nectar RAG Architecture Demo
+              </h3>
+              <button 
+                onClick={() => setShowVideoModal(false)} 
+                className="text-slate-500 hover:text-white bg-white/5 hover:bg-white/10 p-1.5 rounded-lg transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* 16:9 Aspect Ratio Container for YouTube */}
+            <div className="p-6 w-full aspect-video bg-black/50">
+              <iframe 
+                width="100%" 
+                height="100%" 
+                src="https://www.youtube.com/embed/thWc17_v2z0" 
+                title="YouTube video player" 
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowFullScreen
+                className="rounded-lg border border-white/5 shadow-2xl"
+              ></iframe>
+            </div>
+            
+          </div>
+        </div>
+      )}
       {/* Analytics injected at the root of the app */}
       <Analytics />
     </div>
